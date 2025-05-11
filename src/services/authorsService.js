@@ -3,12 +3,12 @@ import axios from "axios";
 const API_URL = "http://localhost:3001/api/authors";
 
 // GET - Recupera tutti gli autori
-export const getAuthors = async () => {
+export const getAuthors = async (page = 1, limit = 6) => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await axios.get(`${API_URL}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
-    console.error("Errore nel recupero degli autori:", error);
+    console.error("Errore nel recupero degli autori:", error.message);
     throw error;
   }
 };

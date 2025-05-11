@@ -4,6 +4,7 @@ import Footer from "./components/footer/Footer";
 import Home from "./views/home/Home";
 import Blog from "./views/blog/Blog";
 import NewBlogPost from "./views/new/New";
+import AuthorPosts from "./views/author/AuthorPosts";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" exact element={<Home />} />
         <Route path="/blog/:id" element={<Blog />} />
         <Route path="/new" element={<NewBlogPost />} />
+        <Route path="/author/:authorEmail/posts" element={<AuthorPosts />} />
       </Routes>
       <Footer />
     </Router>
