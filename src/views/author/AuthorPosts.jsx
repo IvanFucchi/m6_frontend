@@ -13,7 +13,9 @@ const AuthorPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await getPostsByAuthor(authorEmail);
+        console.log("Recupero post per l'autore:", authorEmail);
+        const data = await getPostsByAuthor(encodeURIComponent(authorEmail));
+        console.log("Post recuperati:", data);
         setPosts(data);
         setLoading(false);
       } catch (error) {

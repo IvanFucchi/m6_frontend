@@ -8,11 +8,11 @@ const AuthorsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Funzione per recuperare gli autori con paginazione
+  // funzione per recuperare gli autori con paginazione
   const fetchAuthors = async (page) => {
     try {
       const data = await getAuthors(page, 6); // 6 autori per pagina
-      console.log("✅ Autori ricevuti:", data);
+      console.log("Autori ricevuti:", data);
       setAuthors(data.authors);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -20,12 +20,12 @@ const AuthorsList = () => {
     }
   };
 
-  // Chiamata API quando cambia la pagina
+  // chiamata API quando cambia la pagina
   useEffect(() => {
     fetchAuthors(currentPage);
   }, [currentPage]);
 
-  // Funzioni di navigazione
+  // funzioni di navigazione
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
@@ -44,14 +44,21 @@ const AuthorsList = () => {
       <ListGroup>
         {authors.map((author) => (
           <ListGroup.Item key={author._id}>
-            <Link to={`/authors/${author.email}`}>
-              <strong>{author.nome} {author.cognome}</strong> - {author.email}
-            </Link>
+            {/* Log di debug per vedere cosa arriva */}
+            {console.log("🔍 Autore generato nel link:", author)}
+            
+            {author.email ? (
+              <Link to={`/authors/${encodeURIComponent(author.email)}`}>
+                <strong>{author.nome} {author.cognome}</strong> - {author.email}
+              </Link>
+            ) : (
+              <span style={{ color: "red" }}>⚠️ Email non trovata</span>
+            )}
           </ListGroup.Item>
         ))}
       </ListGroup>
 
-      {/*Navigazione tra le pagine */}
+      {/* navigazione tra le pagine */}
       <div className="pagination-controls d-flex justify-content-center mt-4">
         <Button
           variant="outline-primary"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Image, Button } from "react-bootstrap";
+import { Container, Image, Button, ListGroup, Form } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import BlogAuthor from "../../components/blog/blog-author/BlogAuthor";
 import BlogLike from "../../components/likes/BlogLike";
@@ -8,6 +8,7 @@ import {
   updateBlogPost,
   deleteBlogPost,
 } from "../../services/blogPostsService";
+import { addComment, deleteComment } from "../../services/commentsService"; // Servizio per i commenti
 import "./styles.css";
 
 const Blog = () => {
@@ -15,10 +16,12 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [tempContent, setTempContent] = useState("");
+  const [newComment, setNewComment] = useState("");
+  const [newAuthor, setNewAuthor] = useState("");
   const params = useParams();
   const navigate = useNavigate();
 
-  // Recupera il post al caricamento
+  // recupera il post al caricamento
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -40,7 +43,7 @@ const Blog = () => {
     fetchBlog();
   }, [params, navigate]);
 
-  // Funzione di eliminazione
+  // funzione di eliminazione
   const handleDelete = async () => {
     if (window.confirm("Sei sicuro di voler eliminare questo post?")) {
       await deleteBlogPost(blog._id);
@@ -49,13 +52,52 @@ const Blog = () => {
     }
   };
 
-  // Funzione di modifica
+  // unzione di modifica
   const handleSave = async () => {
     const updatedData = { ...blog, content: tempContent };
     await updateBlogPost(blog._id, updatedData);
     alert("Post modificato con successo!");
     setBlog(updatedData);
     setEditMode(false);
+  };
+
+  // funzione per aggiungere un nuovo commento
+  const handleAddComment = async () => {
+    if (!newComment || !newAuthor) {
+      alert("Compila tutti i campi");
+      return;
+    }
+    const newCommentData = {
+      text: newComment,
+      author: newAuthor,
+    };
+
+    try {
+      const updatedComments = await addComment(blog._id, newCommentData);
+      setBlog((prev) => ({
+        ...prev,
+        comments: updatedComments,
+      }));
+      setNewComment("");
+      setNewAuthor("");
+    } catch (error) {
+      console.error("Errore durante l'aggiunta del commento:", error.message);
+    }
+  };
+
+  // funzione di eliminazione di un commento
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("Vuoi davvero eliminare questo commento?")) {
+      try {
+        await deleteComment(blog._id, commentId);
+        setBlog((prev) => ({
+          ...prev,
+          comments: prev.comments.filter((c) => c._id !== commentId),
+        }));
+      } catch (error) {
+        console.error("Errore durante l'eliminazione del commento:", error.message);
+      }
+    }
   };
 
   if (loading) {
@@ -114,6 +156,44 @@ const Blog = () => {
               Elimina
             </Button>
           </div>
+
+          {/* sezione Commenti */}
+          <h3 className="mt-5">Commenti</h3>
+          <ListGroup>
+            {blog.comments && blog.comments.length > 0 ? (
+              blog.comments.map((comment) => (
+                <ListGroup.Item key={comment._id} className="d-flex justify-content-between">
+                  <div>
+                    <strong>{comment.author}</strong>: {comment.text}
+                  </div>
+                  <Button variant="outline-danger" onClick={() => handleDeleteComment(comment._id)}>
+                    Elimina
+                  </Button>
+                </ListGroup.Item>
+              ))
+            ) : (
+              <p>Nessun commento trovato.</p>
+            )}
+          </ListGroup>
+
+          {/* form per aggiungere un commento */}
+          <Form className="mt-3">
+            <Form.Control
+              placeholder="Nome Autore"
+              value={newAuthor}
+              onChange={(e) => setNewAuthor(e.target.value)}
+              className="mb-2"
+            />
+            <Form.Control
+              placeholder="Aggiungi un commento..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="mb-2"
+            />
+            <Button variant="primary" onClick={handleAddComment}>
+              Aggiungi Commento
+            </Button>
+          </Form>
         </Container>
       </div>
     );
